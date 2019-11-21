@@ -6,14 +6,11 @@ import QtQuick.Particles 2.0
 import QtCharts 2.0
 
 
-//引入C++类型
-import com.bins.mymsg 1.0
-
 ApplicationWindow {
     id:main_window
     visible: true
     visibility: "Maximized"     //最大化       //Minimized 最小化;
-    flags: Qt.FramelessWindowHint   //无边框
+    flags: Qt.WindowFlags   //无边框
     width: 600
     height: 600
     title: qsTr("qml组件测试")
@@ -44,6 +41,7 @@ ApplicationWindow {
         acceptedButtons: Qt.LeftButton|Qt.RightButton
         onClicked: {
             if(mouse.button===Qt.RightButton){
+                move_x_y.stop();//可以中断人物的移动，进行下一次移动
                 var x = mouse.x
                 var y = mouse.y
                 if(x<img.width/2)
@@ -67,7 +65,7 @@ ApplicationWindow {
             }
         }
     }
-    SequentialAnimation{
+    ParallelAnimation{
         id:move_x_y
         running: false
         onStarted: {
@@ -89,7 +87,7 @@ ApplicationWindow {
             property: "x"
             from:img.x
             to:img.to_x
-            duration: Math.abs(img.x-img.to_x)*8    //  5：该数字越大，人物走动越慢
+            duration: Math.sqrt((img.x-img.to_x)*8*(img.x-img.to_x)*8+(img.y-img.to_y)*8*(img.y-img.to_y)*8) //  5：该数字越大，人物走动越慢
             //        easing.type: Easing.InOutQuad     动画效果,不设置默认是匀速普通
 
         }
@@ -100,7 +98,7 @@ ApplicationWindow {
             property: "y"
             from:img.y
             to:img.to_y
-            duration: Math.abs(img.y-img.to_y)*8
+            duration: Math.sqrt((img.x-img.to_x)*8*(img.x-img.to_x)*8+(img.y-img.to_y)*8*(img.y-img.to_y)*8)
         }
     }
 
