@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>resources/hero0/down/0.png</file>
+        <file>resources/hero0/down/1.png</file>
+        <file>resources/hero0/down/2.png</file>
+        <file>resources/hero0/down/down.png</file>
+        <file>resources/hero0/left/0.png</file>
+        <file>resources/hero0/left/1.png</file>
+        <file>resources/hero0/left/2.png</file>
+        <file>resources/hero0/left/left.png</file>
+        <file>resources/hero0/right/0.png</file>
+        <file>resources/hero0/right/1.png</file>
+        <file>resources/hero0/right/2.png</file>
+        <file>resources/hero0/right/right.png</file>
+        <file>resources/hero0/up/0.png</file>
+        <file>resources/hero0/up/1.png</file>
+        <file>resources/hero0/up/2.png</file>
+        <file>resources/hero0/up/up.png</file>
+        <file>resources/back_ground.jpg</file>
+        <file>resources/snow_flake.png</file>
+    </qresource>
+</RCC>
