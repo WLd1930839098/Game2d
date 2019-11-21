@@ -3,19 +3,13 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import QtQuick.Particles 2.0
 
-import QtCharts 2.0
-
-
-//引入C++类型
-import com.bins.mymsg 1.0
-
 ApplicationWindow {
     id:main_window
     visible: true
     visibility: "Maximized"     //最大化       //Minimized 最小化;
-    flags: Qt.FramelessWindowHint   //无边框
-    width: 600
-    height: 600
+    flags: Qt.WindowFullScreen   //有边框,全屏幕
+//    flags: Qt.FramelessWindowHint   //无边框
+
     title: qsTr("qml组件测试")
 
     Image {
@@ -27,6 +21,21 @@ ApplicationWindow {
         property int to_x: 0
         property int to_y: 0
         property string orientation: "down"
+        function getOrientation(){
+            if(Math.abs(img.to_x-img.x)>Math.abs(img.to_y-img.y)){
+                //此种情况下有左右两种情况
+                if(img.x<img.to_x)
+                    return "right"
+                else
+                    return "left"
+            }else{
+                //此种情况下有上下两种情况
+                if(img.y<img.to_y)
+                    return "down"
+                else
+                    return "up"
+            }
+        }
     }
 
     Image {
@@ -44,6 +53,7 @@ ApplicationWindow {
         acceptedButtons: Qt.LeftButton|Qt.RightButton
         onClicked: {
             if(mouse.button===Qt.RightButton){
+                move_x_y.stop();//可以中断人物的移动，进行下一次移动
                 var x = mouse.x
                 var y = mouse.y
                 if(x<img.width/2)
@@ -58,7 +68,7 @@ ApplicationWindow {
                 y = y-img.height/2
                 img.to_x = x
                 img.to_y = y
-
+                img.orientation = img.getOrientation()
                 move_x_y.start()
 
 
@@ -67,20 +77,19 @@ ApplicationWindow {
             }
         }
     }
-    SequentialAnimation{
+    ParallelAnimation{
         id:move_x_y
         running: false
         onStarted: {
+            img.source="./resources/hero0/"+img.orientation+"/0.png"
             timer.running = true;
-            if(img.x<img.to_x)
-                img.source="./resources/hero0/right/0.png"
-            else
-                img.source="./resources/hero0/left/0.png"
         }
 
         onStopped: {
-            timer.running = false
-            img.source = "./resources/hero0/down/0.png"
+            if(img.x===img.to_x&&img.y===img.to_y){
+                img.source = "./resources/hero0/down/0.png"
+                timer.running = false
+            }
         }
 
         NumberAnimation {
@@ -89,7 +98,7 @@ ApplicationWindow {
             property: "x"
             from:img.x
             to:img.to_x
-            duration: Math.abs(img.x-img.to_x)*8    //  5：该数字越大，人物走动越慢
+            duration: Math.sqrt((img.x-img.to_x)*8*(img.x-img.to_x)*8+(img.y-img.to_y)*8*(img.y-img.to_y)*8) //  5：该数字越大，人物走动越慢
             //        easing.type: Easing.InOutQuad     动画效果,不设置默认是匀速普通
 
         }
@@ -100,24 +109,17 @@ ApplicationWindow {
             property: "y"
             from:img.y
             to:img.to_y
-            duration: Math.abs(img.y-img.to_y)*8
+            duration: Math.sqrt((img.x-img.to_x)*8*(img.x-img.to_x)*8+(img.y-img.to_y)*8*(img.y-img.to_y)*8)
         }
     }
 
     Timer{
         id:timer
-        interval: 250
+        interval: 200
         running: false
         repeat: true
         onTriggered: {
-            if(img.x<img.to_x)
-                img.orientation="right"
-            else if(img.x>img.to_x)
-                img.orientation="left"
-            else if(img.y<img.to_y)
-                img.orientation="down"
-            else
-                img.orientation="up"
+            img.orientation = img.getOrientation()
             img.count = (img.count+1)%4
             if(img.count==0)
                 img.source="./resources/hero0/"+img.orientation+"/0.png"
