@@ -7,8 +7,8 @@ ApplicationWindow {
     id:main_window
     visible: true
     visibility: "Maximized"     //最大化       //Minimized 最小化;
-    flags: Qt.WindowFullScreen   //有边框,全屏幕
-//    flags: Qt.FramelessWindowHint   //无边框
+//    flags: Qt.WindowFullScreen   //有边框,全屏幕
+    flags: Qt.FramelessWindowHint   //无边框
 
     title: qsTr("qml组件测试")
 
@@ -39,6 +39,10 @@ ApplicationWindow {
                     return "up"
             }
         }
+
+        function attackStop(){
+            img.is_attack=false
+        }
     }
 
     Image {
@@ -55,33 +59,38 @@ ApplicationWindow {
         anchors.fill: background
         acceptedButtons: Qt.LeftButton|Qt.RightButton
         onClicked: {
+            var x = mouse.x
+            var y = mouse.y
+            if(x<img.width/2)
+                x = img.width/2
+            if(x>background.width-img.width/2)
+                x = background.width-img.width/2
+            if(y<img.height/2)
+                y = img.height/2
+            if(y>background.height-img.height/2)
+                y = background.height-img.height/2
+            x = x-img.width/2
+            y = y-img.height/2
+            img.to_x = x
+            img.to_y = y
+
             if(mouse.button===Qt.RightButton){
+                img.attackStop();
                 move_x_y.stop();//可以中断人物的移动，进行下一次移动
-                var x = mouse.x
-                var y = mouse.y
-                if(x<img.width/2)
-                    x = img.width/2
-                if(x>background.width-img.width/2)
-                    x = background.width-img.width/2
-                if(y<img.height/2)
-                    y = img.height/2
-                if(y>background.height-img.height/2)
-                    y = background.height-img.height/2
-                x = x-img.width/2
-                y = y-img.height/2
-                img.to_x = x
-                img.to_y = y
+
                 img.orientation = img.getOrientation()
                 move_x_y.start()
 
 
             }else if(mouse.button===Qt.LeftButton){
                 //TODO 添加攻击效果
-                img.is_attack = true
-                img.count = 0
-                if(!img.is_moving){
-                    img.orientation = "down"
-                    timer.running = true
+                if(!img.is_attack)
+                {
+                    move_x_y.stop();
+                    img.is_attack=true
+                    img.count = 0
+                    img.orientation=img.getOrientation()
+                    timer.running=true;
                 }
             }
         }
@@ -162,8 +171,7 @@ ApplicationWindow {
             if(attack_complete){
                 folder = "hero0"
                 img.is_attack = false
-                if(!img.is_moving)
-                    timer.running = false
+                timer.running = false
             }
 
             hero_info.text = qsTr("人物坐标: ("+img.x.toFixed(0)+","+img.y.toFixed(0)+")")
@@ -210,11 +218,12 @@ ApplicationWindow {
         }
     }
 
-
+    Button{text: "退出";y:120;onClicked:Qt.quit()}
     //飘雪效果
     Button{text: "开始";y:0;onClicked: particles.start()}
     Button{text: "暂停";y:40;onClicked: particles.pause()}
     Button{text: "恢复";y:80;onClicked: particles.resume()}
+
 
 
     ParticleSystem{
