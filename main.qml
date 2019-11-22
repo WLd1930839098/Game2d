@@ -56,8 +56,10 @@ ApplicationWindow {
     }
 
     MouseArea{
+        id:mouse_area
         anchors.fill: background
         acceptedButtons: Qt.LeftButton|Qt.RightButton
+
         onClicked: {
             var x = mouse.x
             var y = mouse.y
@@ -73,20 +75,18 @@ ApplicationWindow {
             y = y-img.height/2
             img.to_x = x
             img.to_y = y
-
             if(mouse.button===Qt.RightButton){
                 img.attackStop();
                 move_x_y.stop();//可以中断人物的移动，进行下一次移动
 
                 img.orientation = img.getOrientation()
                 move_x_y.start()
-
-
             }else if(mouse.button===Qt.LeftButton){
                 //TODO 添加攻击效果
                 if(!img.is_attack)
                 {
-                    move_x_y.stop();
+                    if(img.is_moving)
+                        move_x_y.stop();
                     img.is_attack=true
                     img.count = 0
                     img.orientation=img.getOrientation()
@@ -108,7 +108,7 @@ ApplicationWindow {
 
         onStopped: {
             if(img.x===img.to_x&&img.y===img.to_y){
-                img.source = "./resources/hero0/down/0.png"
+                img.source = "./resources/hero0/"+img.orientation+"/0.png"
                 timer.running = false
                 img.is_moving = false
             }
@@ -154,10 +154,12 @@ ApplicationWindow {
                 folder = "hero0_attack"
             }
 
-            if(img.count==0)
+            if(img.count==0){
                 img.source="./resources/"+folder+"/"+img.orientation+"/0.png"
-            else if(img.count==1)
+            }
+            else if(img.count==1){
                 img.source="./resources/"+folder+"/"+img.orientation+"/1.png"
+            }
             else if(img.count==2){
                 if(img.is_attack&&!attack_complete){
                     img.source="./resources/"+folder+"/"+img.orientation+"/2.png"
@@ -165,10 +167,19 @@ ApplicationWindow {
                 img.source="./resources/"+folder+"/"+img.orientation+"/0.png"
                 }
             }
-            else
+            else{
                 img.source="./resources/"+folder+"/"+img.orientation+"/2.png"
+                //显示攻击特效
+                if(img.is_attack){
+                    emitter.x = mouse_area.mouseX
+                    emitter.y = mouse_area.mouseY
+                    flame.visible = true
+                    flame.start()
+                    attack_timer.running = true
+                }
+            }
 
-            if(attack_complete){
+            if(img.is_attack&&attack_complete){
                 folder = "hero0"
                 img.is_attack = false
                 timer.running = false
@@ -178,9 +189,23 @@ ApplicationWindow {
         }
     }
 
+    //时间到时关闭攻击特效
+    Timer{
+        id:attack_timer
+        interval: 1000
+        running: false
+        repeat: false
+        onTriggered: {
+            flame.visible = false
+            flame.stop()
+        }
+    }
+
     //火焰效果
     ParticleSystem{
+        id:flame
         anchors.fill: parent
+        running: false
         ImageParticle{
             groups: ["smoke"]
             color: "#222222"
@@ -193,6 +218,7 @@ ApplicationWindow {
             source: "qrc:/particleresources/glowdot.png"
         }
         Emitter{
+            id:emitter
             x:300
             y:300
             group: "flame"
