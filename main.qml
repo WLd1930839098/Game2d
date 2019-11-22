@@ -3,16 +3,13 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.3
 import QtQuick.Particles 2.0
 
-import QtCharts 2.0
-
-
 ApplicationWindow {
     id:main_window
     visible: true
     visibility: "Maximized"     //最大化       //Minimized 最小化;
-    flags: Qt.WindowFlags   //无边框
-    width: 600
-    height: 600
+    flags: Qt.WindowFullScreen   //有边框,全屏幕
+//    flags: Qt.FramelessWindowHint   //无边框
+
     title: qsTr("qml组件测试")
 
     Image {
@@ -24,6 +21,24 @@ ApplicationWindow {
         property int to_x: 0
         property int to_y: 0
         property string orientation: "down"
+        property bool is_attack: false
+        property bool is_moving: false
+
+        function getOrientation(){
+            if(Math.abs(img.to_x-img.x)>Math.abs(img.to_y-img.y)){
+                //此种情况下有左右两种情况
+                if(img.x<img.to_x)
+                    return "right"
+                else
+                    return "left"
+            }else{
+                //此种情况下有上下两种情况
+                if(img.y<img.to_y)
+                    return "down"
+                else
+                    return "up"
+            }
+        }
     }
 
     Image {
@@ -56,12 +71,18 @@ ApplicationWindow {
                 y = y-img.height/2
                 img.to_x = x
                 img.to_y = y
-
+                img.orientation = img.getOrientation()
                 move_x_y.start()
 
 
             }else if(mouse.button===Qt.LeftButton){
-//                timer.running=!timer.running
+                //TODO 添加攻击效果
+                img.is_attack = true
+                img.count = 0
+                if(!img.is_moving){
+                    img.orientation = "down"
+                    timer.running = true
+                }
             }
         }
     }
@@ -69,16 +90,19 @@ ApplicationWindow {
         id:move_x_y
         running: false
         onStarted: {
-            timer.running = true;
-            if(img.x<img.to_x)
-                img.source="./resources/hero0/right/0.png"
-            else
-                img.source="./resources/hero0/left/0.png"
+            if(timer.running==false){
+                img.source="./resources/hero0/"+img.orientation+"/1.png"
+                timer.running = true
+                img.is_moving = true
+            }
         }
 
         onStopped: {
-            timer.running = false
-            img.source = "./resources/hero0/down/0.png"
+            if(img.x===img.to_x&&img.y===img.to_y){
+                img.source = "./resources/hero0/down/0.png"
+                timer.running = false
+                img.is_moving = false
+            }
         }
 
         NumberAnimation {
@@ -104,29 +128,45 @@ ApplicationWindow {
 
     Timer{
         id:timer
-        interval: 250
+        interval: 200
         running: false
         repeat: true
         onTriggered: {
-            if(img.x<img.to_x)
-                img.orientation="right"
-            else if(img.x>img.to_x)
-                img.orientation="left"
-            else if(img.y<img.to_y)
-                img.orientation="down"
-            else
-                img.orientation="up"
+            if(img.is_moving)
+                img.orientation = img.getOrientation()
+            var attack_complete = false
+            if(img.count+1==4){
+                attack_complete = true
+            }
             img.count = (img.count+1)%4
-            if(img.count==0)
-                img.source="./resources/hero0/"+img.orientation+"/0.png"
-            else if(img.count==1)
-                img.source="./resources/hero0/"+img.orientation+"/1.png"
-            else if(img.count==2)
-                img.source="./resources/hero0/"+img.orientation+"/0.png"
-            else
-                img.source="./resources/hero0/"+img.orientation+"/2.png"
+            var folder = "hero0"
 
-            hero_info.text = qsTr("人物坐标: ("+img.x+","+img.y+")")
+            if(img.is_attack&&!attack_complete){
+                folder = "hero0_attack"
+            }
+
+            if(img.count==0)
+                img.source="./resources/"+folder+"/"+img.orientation+"/0.png"
+            else if(img.count==1)
+                img.source="./resources/"+folder+"/"+img.orientation+"/1.png"
+            else if(img.count==2){
+                if(img.is_attack&&!attack_complete){
+                    img.source="./resources/"+folder+"/"+img.orientation+"/2.png"
+                }else{
+                img.source="./resources/"+folder+"/"+img.orientation+"/0.png"
+                }
+            }
+            else
+                img.source="./resources/"+folder+"/"+img.orientation+"/2.png"
+
+            if(attack_complete){
+                folder = "hero0"
+                img.is_attack = false
+                if(!img.is_moving)
+                    timer.running = false
+            }
+
+            hero_info.text = qsTr("人物坐标: ("+img.x.toFixed(0)+","+img.y.toFixed(0)+")")
         }
     }
 
@@ -221,10 +261,11 @@ ApplicationWindow {
             Text {
                 id: hero_info
                 text: qsTr("人物坐标: (-,-)")
+                width: 200
             }
             Text{
                 id:view_info
-                text: qsTr("屏幕尺寸: "+background.width+"*"+background.height)
+                text: qsTr("屏幕尺寸: "+background.width.toFixed(0)+"*"+background.height.toFixed(0))
             }
         }
     }
