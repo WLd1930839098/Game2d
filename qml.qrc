@@ -31,5 +31,8 @@
         <file>resources/hero0_attack/up/0.png</file>
         <file>resources/hero0_attack/up/1.png</file>
         <file>resources/hero0_attack/up/2.png</file>
+        <file>animation/Flame.qml</file>
+        <file>animation/Snow.qml</file>
+        <file>Hero.qml</file>
     </qresource>
 </RCC>
