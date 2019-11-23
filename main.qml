@@ -59,7 +59,13 @@ ApplicationWindow {
 
     Button{text: "退出";y:120;onClicked:Qt.quit()}
     //飘雪效果
-    Button{text: "开始";y:0;onClicked: snow.start()}
+
+    Button{text: "开始";y:0;onClicked:{
+            var test = Qt.vector2d(3,4)
+            var i = test.times(2)
+            console.log(i.times(-1).dotProduct(Qt.vector2d(1,0)))
+        }
+    }
     Button{text: "暂停";y:40;onClicked: snow.pause()}
     Button{text: "恢复";y:80;onClicked: snow.resume()}
 
