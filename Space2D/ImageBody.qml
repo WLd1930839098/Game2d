@@ -45,6 +45,7 @@ Image {
         velocity = self.destination.minus(center).normalized().times(speed);
     }
 
+
     function stop(){
         //将速度置为0
         self.isMoving = false;
@@ -85,9 +86,10 @@ Image {
     signal refresh
 
     onRefresh:  {
-        self.refreshMove()
+
         //检测碰撞
         if(bodyType === Space2D.rigid){
+
             var i=0,len ;
             Space2D.pause();
             for(i=0, len = listenBodies.length; i<len; i++){
@@ -95,6 +97,7 @@ Image {
             }
             Space2D.start();
         }
+        self.refreshMove()
     }
 
 

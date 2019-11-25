@@ -9,9 +9,9 @@ import "./Space2D/animation"
 ApplicationWindow {
     id:main_window
     visible: true
-    visibility: "Maximized"     //最大化       //Minimized 最小化;
     //flags: Qt.WindowFullScreen   //有边框,全屏幕
-    flags: Qt.FramelessWindowHint   //无边框
+    width: 900
+    height: 900
     title: qsTr("2D游戏主界面")
 
 
