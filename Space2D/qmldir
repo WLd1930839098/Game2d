@@ -1,0 +1,3 @@
+module Space2D
+singleton Space2D 0.1 Space2D.qml
+
